@@ -2,6 +2,7 @@ package com.algamoney.api.service;
 
 import java.util.Optional;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,38 @@ public class LancamentoService {
 		}
 		
 		return lancamentoRepository.save(lancamento);
+	}
+
+	public Lancamento atualizar(Long codigo, Lancamento lancamento) {
+		// Busca o lançamento atual no banco
+		Lancamento lancamentoSalvo = buscarLancamentoExistente(codigo);
+		
+		// Se a pessoa do lançamento atual é diferente da pessoa que está sendo atualizada
+		if (!lancamento.getPessoa().equals(lancamentoSalvo.getPessoa())) {
+			// Valida se a pessoa está cadastrada
+			validarPessoa(lancamento);
+		}
+
+		// Copia as propriedades que não foram informadas para o objeto que vai atualizar
+		BeanUtils.copyProperties(lancamento, lancamentoSalvo, "codigo");
+
+		// Salva no banco
+		return lancamentoRepository.save(lancamentoSalvo);
+	}
+
+	private void validarPessoa(Lancamento lancamento) {
+		Optional<Pessoa> obj = pessoaRepository.findById(lancamento.getPessoa().getCodigo());
+		if (obj.isEmpty() || obj.get().isInativo()) {
+			throw new PessoaInexistenteOuInativaException();
+		}
+	}
+
+	private Lancamento buscarLancamentoExistente(Long codigo) {
+		Optional<Lancamento> obj = lancamentoRepository.findById(codigo);
+		if (obj.isEmpty()) {
+			throw new IllegalArgumentException();
+		}
+		return obj.get();
 	}
 	
 }

@@ -1,17 +1,25 @@
 package com.algamoney.api.config;
 
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
+import org.springframework.security.oauth2.provider.token.TokenEnhancer;
+import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
+import com.algamoney.api.config.token.CustomTokenEnhancer;
+
+@Profile("oauth-security")
 @Configuration
 @EnableAuthorizationServer
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
@@ -61,7 +69,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 				.secret("$2a$10$UulIOlI7RMWzWhzrd89tseXY0upIR1PHr9Axlt11IuXH/6aHFMloG")
 				.scopes("read", "write")
 				.authorizedGrantTypes("password", "refresh_token")
-				.accessTokenValiditySeconds(1800)
+				.accessTokenValiditySeconds(10)
 				.refreshTokenValiditySeconds(3600 * 24)
 			.and()
 				.withClient("mobile")
@@ -89,11 +97,26 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 			.authenticationManager(authenticationManager);
 	}
 	*/
+	/*
 	@Override
 	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 		endpoints
 			.tokenStore(tokenStore())
 			.accessTokenConverter(accessTokenConverter())
+			.reuseRefreshTokens(false)
+			.authenticationManager(authenticationManager);
+	}
+	*/
+	@Override
+	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+		// Cria um tipo de token com mais detalhes (melhorados)
+		TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
+		// Inclui um array de objetos do tipo TokenEnhancer no token
+		tokenEnhancerChain.setTokenEnhancers(Arrays.asList(tokenEnhancer(), accessTokenConverter()));
+		
+		endpoints
+			.tokenStore(tokenStore())
+			.tokenEnhancer(tokenEnhancerChain)
 			.reuseRefreshTokens(false)
 			.authenticationManager(authenticationManager);
 	}
@@ -114,6 +137,12 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 	@Bean
 	public TokenStore tokenStore() {
 		return new JwtTokenStore(accessTokenConverter());
+	}
+	
+	// Retorna um objeto que implementa a interface TokenEnhancer
+	@Bean
+	public TokenEnhancer tokenEnhancer() {
+	    return new CustomTokenEnhancer();
 	}
 	
 }

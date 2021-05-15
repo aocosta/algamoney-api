@@ -44,8 +44,7 @@ public class PessoaService {
 		if (obj.isEmpty()) {
 			throw new EmptyResultDataAccessException(1);
 		}
-		Pessoa pessoaSalva = obj.get();
-		return pessoaSalva;
+		return obj.get();
 	}
 	
 }
