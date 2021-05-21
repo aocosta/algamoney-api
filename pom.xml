@@ -80,19 +80,21 @@
 		</dependency>
 		
 		<!-- Bibliotecas de segurança oauth -->
+		<!-- adiciona novos endpoints a aplicação: Ex: /oauth/token -->
 		<dependency>
 			<groupId>org.springframework.security.oauth</groupId>
 			<artifactId>spring-security-oauth2</artifactId>
 			<version>2.3.5.RELEASE</version>
 		</dependency>
 		
+		<!-- Bibliotecas do JWT -->
 		<dependency>
 		    <groupId>org.springframework.security</groupId>
 		    <artifactId>spring-security-jwt</artifactId>
 		    <version>1.1.1.RELEASE</version>
 		</dependency>
 		
-		<!-- Dependência para o funcionamento da anotação @ConfigurationProperties -->
+		<!-- Dependência para o funcionamento da anotação @ConfigurationProperties da classe AlgamoneyApiProperty -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>

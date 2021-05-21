@@ -22,6 +22,8 @@ import com.algamoney.api.event.RecursoCriadoEvent;
 import com.algamoney.api.model.Categoria;
 import com.algamoney.api.repository.CategoriaRepository;
 
+// Classe que disponibiliza recursos de /categorias para os clientes
+
 /*
 STATUS CODE:
 2XX -> SUCESSO
@@ -29,6 +31,7 @@ STATUS CODE:
 5XX -> ERRO DO SERVIDOR 
 */
 
+// @CrossOrigin					// permite a todas as origens chamar todos os métodos desse controlador
 @RestController
 @RequestMapping("/categorias")
 public class CategoriaResource {
@@ -41,9 +44,18 @@ public class CategoriaResource {
 	private ApplicationEventPublisher publisher;
 
 	// LISTAR CATEGORIAS -------------------------------------------------------------
-	@GetMapping
-	// @PreAuthorize("hasAuthority('ROLE_PESQUISAR_CATEGORIA')")
+	
+	// @CrossOrigin											// permite a todas as origens chamar este método
+	// @CrossOrigin(maxAge = 10)							// maxAge -> em quanto tempo o browse vai fazer essa requisição
+	// @CrossOrigin(origins = {"http://localhost:8000"})	// origins -> quais as origens permitidas
+	// @CrossOrigin(allowedHeaders = {"..."})				// allowedHeaders -> quais os headers permitidos
+	// @PreAuthorize("hasAuthority('ROLE_PESQUISAR_CATEGORIA')") // verifica se o usuário tem autorização para chamar esse método
+	
+	// verifica os escopos - se o usuário e os clientes (angular e mobile) tem autorização para chamar esse método
+	// Para que esta anotação funcione foi necessário a anotação @EnableGlobalMethodSecurity e o método createExpressionHandler()
+	// na classe ResourceServerConfig
 	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_CATEGORIA') and #oauth2.hasScope('read')")
+	@GetMapping
 	public List<Categoria> listar() {
 		return categoriaRepository.findAll();
 	}
@@ -66,9 +78,13 @@ public class CategoriaResource {
 	}
 	*/
 	
-	@GetMapping("/{codigo}")
-	// @PreAuthorize("hasAuthority('ROLE_PESQUISAR_CATEGORIA')")
+	// @PreAuthorize("hasAuthority('ROLE_PESQUISAR_CATEGORIA')") // verifica se o usuário tem autorização para chamar esse método
+	
+	// verifica os escopos - se o usuário e os clientes (angular e mobile) tem autorização para chamar esse método
+	// Para que esta anotação funcione foi necessário a anotação @EnableGlobalMethodSecurity e o método createExpressionHandler()
+	// na classe ResourceServerConfig
 	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_CATEGORIA') and #oauth2.hasScope('read')")
+	@GetMapping("/{codigo}")
 	public ResponseEntity<?> buscarPeloCodigo(@PathVariable Long codigo) {
 		Optional<Categoria> obj = categoriaRepository.findById(codigo);
 		return !obj.isEmpty() ? ResponseEntity.ok(obj.get()) : ResponseEntity.notFound().build();
@@ -125,9 +141,13 @@ public class CategoriaResource {
 	}
 	*/
 	
-	@PostMapping
-	// @PreAuthorize("hasAuthority('ROLE_CADASTRAR_CATEGORIA')")
+	// @PreAuthorize("hasAuthority('ROLE_CADASTRAR_CATEGORIA')") // verifica se o usuário tem autorização para chamar esse método
+	
+	// verifica os escopos - se o usuário e os clientes (angular e mobile) tem autorização para chamar esse método
+	// Para que esta anotação funcione foi necessário a anotação @EnableGlobalMethodSecurity e o método createExpressionHandler()
+	// na classe ResourceServerConfig
 	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_CATEGORIA') and #oauth2.hasScope('write')")
+	@PostMapping
 	public ResponseEntity<Categoria> criar(@Valid @RequestBody Categoria categoria, HttpServletResponse response) {
 		Categoria categoriaSalva = categoriaRepository.save(categoria);
 		publisher.publishEvent(new RecursoCriadoEvent(this, response, categoriaSalva.getCodigo()));

@@ -18,14 +18,16 @@ import org.springframework.stereotype.Component;
 
 import com.algamoney.api.config.property.AlgamoneyApiProperty;
 
-// Esse filtro foi criado para permitir o acesso de origens permitidas
+// Classe para filtrar as origens que terão acesso a aplicação
 
-// Ordered.HIGHEST_PRECEDENCE: alta prioridade, analisa a requisição primeiro
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(Ordered.HIGHEST_PRECEDENCE)	// // Ordered.HIGHEST_PRECEDENCE: alta prioridade, analisa a requisição antes de todo mundo
 public class CorsFilter implements Filter {
 
-	// private String originPermitida = "http://localhost:8000"; // TODO: Configurar para diferentes ambientes
+	// Essa configuração passou a ser dada pela classe AlgamoneyApiProperty
+	// private String originPermitida = "http://localhost:8080"; // TODO: Configurar para diferentes ambientes
+	
+	// Classe de configuração de ambiente (desenvolvimento ou produção)
 	@Autowired
 	private AlgamoneyApiProperty algamoneyApiProperty;
 	
@@ -37,24 +39,29 @@ public class CorsFilter implements Filter {
 		HttpServletRequest request = (HttpServletRequest) req;
 		HttpServletResponse response = (HttpServletResponse) resp;
 		
+		// Esses dois Headers precisam estar fora do if porque precisam ser enviados sempre na resposta,
+		// para que "POST, GET, DELETE e PUT continuem funcionado para requisições de outra origem
+		// ----------------------------------------------------------------------------------------------------------
 		// Seta a origem permitida
 		// response.setHeader("Access-Control-Allow-Origin", originPermitida);
 		response.setHeader("Access-Control-Allow-Origin", algamoneyApiProperty.getOriginPermitida());
 		
-		// Seta permissão para enviar cookie
+		// Responde que a origem tem permissão para enviar cookie
         response.setHeader("Access-Control-Allow-Credentials", "true");
+        // ----------------------------------------------------------------------------------------------------------
 		
-        // Se o método da requisição for um OPTIONS e a requisição for de uma origem permitida
+        // Se a requisição for um OPTIONS, ou seja, for um preflight do browser antes da requisição original
+        // e a requisição for de uma origem permitida
 		// if ("OPTIONS".equals(request.getMethod()) && originPermitida.equals(request.getHeader("Origin"))) {
 		if ("OPTIONS".equals(request.getMethod()) && algamoneyApiProperty.getOriginPermitida().equals(request.getHeader("Origin"))) {
-			// Seta os métodos permitidos para essa origem
+			// Responde quais os métodos permitidos para essa origem
 			response.setHeader("Access-Control-Allow-Methods", "POST, GET, DELETE, PUT, OPTIONS");
-			// Seta os headers permitidos para essa origem
+			// Responde quais os headers permitidos para essa origem
         	response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, Accept");
-        	// Seta o tempo permitidos para essa origem
-        	response.setHeader("Access-Control-Max-Age", "3600");
+        	// Responde qual o tempo permitido para essa origem
+        	response.setHeader("Access-Control-Max-Age", "3600");	// 1 hora
 			
-        	// Envia código de resposta OK
+        	// Código de resposta OK
 			response.setStatus(HttpServletResponse.SC_OK);
 		} else {
 			// Continua o processamento normal

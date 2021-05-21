@@ -28,6 +28,8 @@ import com.algamoney.api.model.Pessoa;
 import com.algamoney.api.repository.PessoaRepository;
 import com.algamoney.api.service.PessoaService;
 
+// Classe que disponibiliza recursos de /pessoas para os clientes
+
 @RestController
 @RequestMapping("/pessoas")
 public class PessoaResource {
@@ -38,7 +40,7 @@ public class PessoaResource {
 	@Autowired
 	private PessoaService pessoaService;
 	
-	// Injeta a classe RecursoCriadoListener 
+	// Injeta a classe RecursoCriadoListener, que implementa esta interface
 	@Autowired
 	private ApplicationEventPublisher publisher;
 	

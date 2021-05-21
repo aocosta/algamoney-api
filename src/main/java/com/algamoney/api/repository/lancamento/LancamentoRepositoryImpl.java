@@ -44,6 +44,7 @@ public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery {
 	}
 	*/
 	
+	// Método que retorna um modelo completo da entidade Lancamento com os dados filtrados e paginados
 	@Override
 	public Page<Lancamento> filtrar(LancamentoFilter lancamentoFilter, Pageable pageable) {
 		CriteriaBuilder builder = manager.getCriteriaBuilder();
@@ -66,6 +67,7 @@ public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery {
 		return new PageImpl<>(query.getResultList(), pageable, total(lancamentoFilter));
 	}
 	
+	// Método que retorna um modelo resumido de entidade Lancamento com os dados filtrados e paginados
 	@Override
 	public Page<ResumoLancamento> resumir(LancamentoFilter lancamentoFilter, Pageable pageable) {
 		CriteriaBuilder builder = manager.getCriteriaBuilder();
@@ -156,14 +158,24 @@ public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery {
 	
 	// OBTEM O TOTAL DE REGISTROS
 	private Long total(LancamentoFilter lancamentoFilter) {
+		
+		// Obtem um objeto criador de query 
 		CriteriaBuilder builder = manager.getCriteriaBuilder();
+		
+		// Obtem um objeto Criteria para colocar as claúsulas da query
 		CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
+		
+		// Cláusula From
 		Root<Lancamento> root = criteria.from(Lancamento.class);
 		
+		// Cláusula Where
 		Predicate[] predicates = criarRestricoes(lancamentoFilter, builder, root);
 		criteria.where(predicates);
 		
+		// Faz um select count()
 		criteria.select(builder.count(root));
+		
+		// Retorna a quantidade de registros
 		return manager.createQuery(criteria).getSingleResult();
 	}
 

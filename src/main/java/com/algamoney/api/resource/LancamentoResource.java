@@ -36,6 +36,8 @@ import com.algamoney.api.repository.projection.ResumoLancamento;
 import com.algamoney.api.service.LancamentoService;
 import com.algamoney.api.service.exception.PessoaInexistenteOuInativaException;
 
+// Classe que disponibiliza recursos de /lancamentos para os clientes
+
 @RestController
 @RequestMapping("/lancamentos")
 public class LancamentoResource {
@@ -46,11 +48,11 @@ public class LancamentoResource {
 	@Autowired
 	private LancamentoService lancamentoService;
 	
-	// Injeta a classe RecursoCriadoListener 
+	// Injeta a classe RecursoCriadoListener, que implementa esta interface
 	@Autowired
 	private ApplicationEventPublisher publisher;
 	
-	// MessageSource: representa o arquivo de mensagens messages.properties
+	// Injeta um MessageSource, que representa o arquivo de mensagens messages.properties
 	@Autowired
 	private MessageSource messageSource;
 	
@@ -68,25 +70,34 @@ public class LancamentoResource {
 		return lancamentoRepository.filtrar(lancamentoFilter);
 	}
 	*/
-	
-	@GetMapping
+
+	// verifica os escopos - se o usuário e os clientes (angular e mobile) tem autorização para chamar esse método
+	// Para que esta anotação funcione foi necessário a anotação @EnableGlobalMethodSecurity e o método createExpressionHandler()
+	// na classe ResourceServerConfig
 	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
+	@GetMapping
 	public Page<Lancamento> pesquisar(LancamentoFilter lancamentoFilter, Pageable pageable) {
 		return lancamentoRepository.filtrar(lancamentoFilter, pageable);
 	}
 	// -----------------------------------------------------------------------------------
 	
 	// LISTAR LANCAMENTOS RESUMIDO -------------------------------------------------------
-	@GetMapping(params = "resumo")
+	// verifica os escopos - se o usuário e os clientes (angular e mobile) tem autorização para chamar esse método
+	// Para que esta anotação funcione foi necessário a anotação @EnableGlobalMethodSecurity e o método createExpressionHandler()
+	// na classe ResourceServerConfig
 	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
+	@GetMapping(params = "resumo")
 	public Page<ResumoLancamento> resumir(LancamentoFilter lancamentoFilter, Pageable pageable) {
 		return lancamentoRepository.resumir(lancamentoFilter, pageable);
 	}
 	// -----------------------------------------------------------------------------------
 	
 	// BUSCAR PELO CÓDIGO ----------------------------------------------------------------
-	@GetMapping("/{codigo}")
+	// verifica os escopos - se o usuário e os clientes (angular e mobile) tem autorização para chamar esse método
+	// Para que esta anotação funcione foi necessário a anotação @EnableGlobalMethodSecurity e o método createExpressionHandler()
+	// na classe ResourceServerConfig
 	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
+	@GetMapping("/{codigo}")
 	public ResponseEntity<?> buscarPeloCodigo(@PathVariable Long codigo) {
 		Optional<Lancamento> obj = lancamentoRepository.findById(codigo);
 		return !obj.isEmpty() ? ResponseEntity.ok(obj.get()) : ResponseEntity.notFound().build();
@@ -94,8 +105,8 @@ public class LancamentoResource {
 	// -----------------------------------------------------------------------------------
 	
 	// INSERIR LANÇAMENTO ----------------------------------------------------------------
-	// @RequestBody: o objeto será recebido no body da requisição
-	// @Valid: usa as anotações de validação das propriedades do objeto
+	// @RequestBody: o objeto será passado no body da requisição
+	// @Valid: valida as propriedades do objeto de acordo com as anotações de validação cada um deles
 	/*
 	@PostMapping
 	public ResponseEntity<Lancamento> criar(@Valid @RequestBody Lancamento lancamento, HttpServletResponse response) {
@@ -104,9 +115,14 @@ public class LancamentoResource {
 		return ResponseEntity.status(HttpStatus.CREATED).body(lancamentoSalvo);
 	}
 	*/
-	
-	@PostMapping
+
+	// verifica os escopos - se o usuário e os clientes (angular e mobile) tem autorização para chamar esse método
+	// Para que esta anotação funcione foi necessário a anotação @EnableGlobalMethodSecurity e o método createExpressionHandler()
+	// na classe ResourceServerConfig
 	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_LANCAMENTO') and #oauth2.hasScope('write')")
+	@PostMapping
+											// @RequestBody: o objeto será passado no body da requisição
+											// @Valid: valida as propriedades do objeto de acordo com as anotações de validação cada um deles
 	public ResponseEntity<Lancamento> criar(@Valid @RequestBody Lancamento lancamento, HttpServletResponse response) {
 		Lancamento lancamentoSalvo = lancamentoService.salvar(lancamento);
 		publisher.publishEvent(new RecursoCriadoEvent(this, response, lancamentoSalvo.getCodigo()));
@@ -115,11 +131,12 @@ public class LancamentoResource {
 	// -----------------------------------------------------------------------------------
 	
 	// DELETAR LANÇAMENTO ----------------------------------------------------------------
-	// @ResponseStatus: informa de antemão o código de resposta do método
-	
-	@DeleteMapping("/{codigo}")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
+	// verifica os escopos - se o usuário e os clientes (angular e mobile) tem autorização para chamar esse método
+	// Para que esta anotação funcione foi necessário a anotação @EnableGlobalMethodSecurity e o método createExpressionHandler()
+	// na classe ResourceServerConfig
 	@PreAuthorize("hasAuthority('ROLE_REMOVER_LANCAMENTO') and #oauth2.hasScope('write')")
+	@DeleteMapping("/{codigo}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)	// código de resposta do método em caso de sucesso
 	public void remover(@PathVariable Long codigo) {
 		lancamentoRepository.deleteById(codigo);
 	}
@@ -135,8 +152,11 @@ public class LancamentoResource {
 	}
 	
 	// ALTERAR LANÇAMENTO ----------------------------------------------------------------
+	// verifica os escopos - se o usuário e os clientes (angular e mobile) tem autorização para chamar esse método
+	// Para que esta anotação funcione foi necessário a anotação @EnableGlobalMethodSecurity e o método createExpressionHandler()
+	// na classe ResourceServerConfig	
+	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_LANCAMENTO') and #oauth2.hasScope('write')")
 	@PutMapping("/{codigo}")
-	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_LANCAMENTO')")
 	public ResponseEntity<Lancamento> atualizar(@PathVariable Long codigo, @Valid @RequestBody Lancamento lancamento) {
 		try {
 			Lancamento lancamentoSalvo = lancamentoService.atualizar(codigo, lancamento);

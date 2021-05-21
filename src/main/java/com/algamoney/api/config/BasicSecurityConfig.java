@@ -1,5 +1,6 @@
 package com.algamoney.api.config;
 
+/*
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
@@ -43,3 +44,4 @@ public class BasicSecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 	
 }
+*/

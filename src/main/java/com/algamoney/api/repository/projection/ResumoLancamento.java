@@ -5,6 +5,9 @@ import java.time.LocalDate;
 
 import com.algamoney.api.model.TipoLancamento;
 
+// Classe para ser um resumo dos dados do Lançamento
+// O objetivo é ser apresentar um resumo dos dados do lançamento em mais um recurso para o cliente
+
 public class ResumoLancamento {
 
 	private Long codigo;
