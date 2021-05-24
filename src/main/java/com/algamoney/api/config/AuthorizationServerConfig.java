@@ -85,7 +85,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 				.secret("$2a$10$UulIOlI7RMWzWhzrd89tseXY0upIR1PHr9Axlt11IuXH/6aHFMloG")	// senha do cliente encodada (@ngul@r0)
 				.scopes("read", "write")			// define escopos para o cliente (o que esse cliente vai poder fazer)
 				.authorizedGrantTypes("password", "refresh_token") // define o fluxo como Password Flow (usuário e senha) e Refresh Token
-				.accessTokenValiditySeconds(10)				// Quantos segundos o token vai ficar ativo
+				.accessTokenValiditySeconds(30)				// Quantos segundos o token vai ficar ativo
 				.refreshTokenValiditySeconds(3600 * 24)		// Quantos segundos o refresh_token vai ficar ativo (24 horas)
 			.and()	// Próximo cliente
 				.withClient("mobile")				// nome do segundo cliente que pode acessar a aplicação
