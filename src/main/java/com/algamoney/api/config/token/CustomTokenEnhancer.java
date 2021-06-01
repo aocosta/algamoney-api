@@ -1,6 +1,5 @@
 package com.algamoney.api.config.token;
 
-/*
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,12 +17,15 @@ public class CustomTokenEnhancer implements TokenEnhancer {
 		// Obtem o usuário logado
 		UsuarioSistema usuarioSistema = (UsuarioSistema) authentication.getPrincipal();
 		
+		// Cria um mapa e adiciona o nome nome do usuário logado 
 		Map<String, Object> addInfo = new HashMap<>();
 		addInfo.put("nome", usuarioSistema.getUsuario().getNome());
 		
+		// Adiciona o mapa no token
 		((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(addInfo);
+		
+		// Retorna o token
 		return accessToken;
 	}
 
 }
-*/

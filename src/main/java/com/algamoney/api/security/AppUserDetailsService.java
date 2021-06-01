@@ -8,7 +8,6 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -37,7 +36,10 @@ public class AppUserDetailsService implements UserDetailsService {
 		Usuario usuario = usuarioOptional.orElseThrow(() -> new UsernameNotFoundException("Usuário e/ou senha incorretos"));
 		
 		// Retorna uma implementação de UserDetails exigido pelo método com o usuário, senha e permissões
-		return new User(email, usuario.getSenha(), getPermissoes(usuario));
+		// return new User(email, usuario.getSenha(), getPermissoes(usuario));
+		
+		// Retorna uma extensão de User (que por sua vez implementa UserDetails) para que possamos pegar o nome do usuário logado
+		return new UsuarioSistema(usuario, getPermissoes(usuario));
 	}
 	
 	/*

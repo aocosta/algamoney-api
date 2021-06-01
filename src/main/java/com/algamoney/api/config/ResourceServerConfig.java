@@ -2,6 +2,7 @@ package com.algamoney.api.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,9 +15,11 @@ import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecur
 // Biblioteca spring-security-oauth2 (pom.xml)
 // Classe oauth para interceptar e verificar as permissões das requisições do Client (angular)
 // adiciona novos endpoints a aplicação: Ex: /oauth/token
+// Classe para uso em produção
+// depende da configuração spring.profiles.active=oauth-security no application.properties
 
 // @EnableWebSecurity	// a partir do Spring Boot 2.1.5 não é mais necessário essa anotação
-// @Profile("oauth-security")
+@Profile("oauth-security") // Classe só fica ativa se no application.properties -> spring.profiles.active=oauth-security
 @Configuration
 @EnableResourceServer
 @EnableGlobalMethodSecurity(prePostEnabled = true)	// anotação para adicionar a segurança das autorizações das ROLES nos métodos http

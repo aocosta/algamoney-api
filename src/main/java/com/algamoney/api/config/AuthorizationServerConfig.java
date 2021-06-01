@@ -1,23 +1,32 @@
 package com.algamoney.api.config;
 
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
+import org.springframework.security.oauth2.provider.token.TokenEnhancer;
+import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
+import com.algamoney.api.config.token.CustomTokenEnhancer;
+
 // Biblioteca spring-security-oauth2 (pom.xml)
 // Classe para dar autorização ao Client (angular) para acessar a aplicação (fazer requisições)
 // adiciona novos endpoints a aplicação: Ex: /oauth/token
+// Classe para uso em produção
+// depende da configuração spring.profiles.active=oauth-security no application.properties
 
-// @Profile("oauth-security")
+@Profile("oauth-security") // Classe só fica ativa se no application.properties -> spring.profiles.active=oauth-security
 @Configuration
 @EnableAuthorizationServer
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
@@ -82,7 +91,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 		clients.inMemory()							// define a configuração em memória
 				.withClient("angular")				// nome do primeiro cliente que pode acessar a aplicação
-				.secret("$2a$10$UulIOlI7RMWzWhzrd89tseXY0upIR1PHr9Axlt11IuXH/6aHFMloG")	// senha do cliente encodada (@ngul@r0)
+				.secret("$2a$10$UulIOlI7RMWzWhzrd89tseXY0upIR1PHr9Axlt11IuXH/6aHFMloG")	// senha do cliente encodada (@ngul@r0 - $2a$10$UulIOlI7RMWzWhzrd89tseXY0upIR1PHr9Axlt11IuXH/6aHFMloG)
 				.scopes("read", "write")			// define escopos para o cliente (o que esse cliente vai poder fazer)
 				.authorizedGrantTypes("password", "refresh_token") // define o fluxo como Password Flow (usuário e senha) e Refresh Token
 				.accessTokenValiditySeconds(30)				// Quantos segundos o token vai ficar ativo
@@ -132,6 +141,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 	}
 	*/
 	
+	/*
 	// Método para armazenar o JWT
 	// A partir do Spring Boot 2.1.5 a autenticação do usuário (userDetailsService)
 	// saiu da classe ResourceServerConfig e passou para cá
@@ -144,22 +154,27 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 	        .userDetailsService(userDetailsService)			// valida usuário e senha
 	        .authenticationManager(authenticationManager);
 	}
+	*/
 
-	/*
 	@Override
+	// Método para armazenar o JWT
+	// A partir do Spring Boot 2.1.5 a autenticação do usuário (userDetailsService)
+	// saiu da classe ResourceServerConfig e passou para cá
 	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-		// Cria um tipo de token com mais detalhes (melhorados)
+		// Cria um tipo de token melhorado que pode receber mais detalhes, para passar o nome do usuário para o front-end
 		TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
-		// Inclui um array de objetos do tipo TokenEnhancer no token
+		
+		// Passa para o token melhorado (tokenEnhancerChain) o token normal (accessTokenConverter()) +
+		// uma implementação da interface TokenEnhancer para obter o nome do usuário
 		tokenEnhancerChain.setTokenEnhancers(Arrays.asList(tokenEnhancer(), accessTokenConverter()));
 		
 		endpoints
-			.tokenStore(tokenStore())
-			.tokenEnhancer(tokenEnhancerChain)
-			.reuseRefreshTokens(false)
+			.tokenStore(tokenStore())						// define onde o JWT será armazenado
+			.tokenEnhancer(tokenEnhancerChain)				// passa o token melhorado
+			.reuseRefreshTokens(false)						// define que um novo Refresh Token também será enviado a cada pedido de novo Access Token
+			.userDetailsService(userDetailsService)			// valida usuário e senha
 			.authenticationManager(authenticationManager);
 	}
-	*/
 
 	// ----------------------------------------------------------------------------------------------------------------------
 	
@@ -188,12 +203,10 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 		return accessTokenConverter;
 	}
 	
-	/*
 	// Retorna um objeto que implementa a interface TokenEnhancer
 	@Bean
 	public TokenEnhancer tokenEnhancer() {
 	    return new CustomTokenEnhancer();
 	}
-	*/
 	
 }

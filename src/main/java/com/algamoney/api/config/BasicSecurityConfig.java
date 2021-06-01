@@ -1,6 +1,5 @@
 package com.algamoney.api.config;
 
-/*
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
@@ -13,7 +12,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-@Profile("basic-security")
+// Classe para fazer autenticação básica com usuário cadastro no banco
+// Classe usada apenas para auxiliar o desenvolvimento do front-end
+// depende da configuração spring.profiles.active=basic-security no application.properties
+
+
+@Profile("basic-security") // Classe só fica ativa se no application.properties -> spring.profiles.active=basic-security
 @EnableWebSecurity
 public class BasicSecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -44,4 +48,3 @@ public class BasicSecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 	
 }
-*/
