@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,7 @@ import com.algamoney.api.config.property.AlgamoneyApiProperty;
 // Classe para dar logout na aplicação.
 // A idéia é limpar o cookie refreshToken, dar valor nulo para ele, impedindo dessa forma o acesso
 
+@Profile("oauth-security")
 @RestController
 @RequestMapping("/tokens")
 public class TokenResource {
